@@ -151,7 +151,7 @@ void main(){
  if(sphere==1){n=normalize(p);uv=vec2(atan(p.z,p.x)/(2.*PI)+.5,asin(clamp(p.y,-1.,1.))/PI+.5);tangent=normalize(vec3(-p.z,0,p.x)+vec3(.000001,0,0));bitangent=cross(tangent,n);}
  else{n=vec3(0,0,1);if(d.z>0.)n=-n;uv=p.xy/2.16+.5;tangent=vec3(1,0,0);bitangent=vec3(0,1,0);}
  vec3 v=normalize(o-p);uv*=tiling;
- if(hasHeight==1){vec3 vt=vec3(dot(v,tangent),dot(v,bitangent),abs(dot(v,n)));float h=texture(heightMap,uv).r-.5;uv-=vt.xy/max(vt.z,.25)*h*heightStrength;vec2 e=1./vec2(textureSize(heightMap,0));float dx=texture(heightMap,uv+vec2(e.x,0)).r-texture(heightMap,uv-vec2(e.x,0)).r;float dy=texture(heightMap,uv+vec2(0,e.y)).r-texture(heightMap,uv-vec2(0,e.y)).r;n=normalize(n-tangent*dx*heightStrength*40.-bitangent*dy*heightStrength*40.);}
+ if(hasHeight==1){vec3 vt=vec3(dot(v,tangent),dot(v,bitangent),abs(dot(v,n)));float h=texture(heightMap,uv).r-.5;uv+=vt.xy/max(vt.z,.25)*h*heightStrength;vec2 e=1./vec2(textureSize(heightMap,0));float dx=texture(heightMap,uv+vec2(e.x,0)).r-texture(heightMap,uv-vec2(e.x,0)).r;float dy=texture(heightMap,uv+vec2(0,e.y)).r-texture(heightMap,uv-vec2(0,e.y)).r;n=normalize(n-tangent*dx*heightStrength*40.-bitangent*dy*heightStrength*40.);}
  vec3 base=vec3(.55,.31,.16);float rough=roughness,metal=metallic,ao=1.;
  if(demo==1){vec3 z=p*7.;float patina=smoothstep(.39,.58,fbm(z));float grain=noise(p*220.);base=mix(vec3(.42,.19,.065),vec3(.025,.22,.16),patina);base*=.6+fbm(z*6.)*.8;rough=clamp(roughness+patina*.3+(grain-.5)*.13,.04,1.);metal=metallic*(1.-patina*.85);n=normalize(n+tangent*(noise(p*140.)-.5)*.18*normalStrength+bitangent*(noise(p*140.+10.)-.5)*.18*normalStrength);}
  if(hasBase==1)base=pow(texture(baseMap,uv).rgb,vec3(2.2));
