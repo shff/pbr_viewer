@@ -151,9 +151,10 @@ void main(){
  if(sphere==1){n=normalize(p);uv=vec2(atan(p.z,p.x)/(2.*PI)+.5,asin(clamp(p.y,-1.,1.))/PI+.5);tangent=normalize(vec3(-p.z,0,p.x)+vec3(.000001,0,0));bitangent=cross(tangent,n);}
  else{n=vec3(0,0,1);if(d.z>0.)n=-n;uv=p.xy/2.16+.5;tangent=vec3(1,0,0);bitangent=vec3(0,1,0);}
  vec3 v=normalize(o-p);uv*=tiling;
+ vec2 gradX=dFdx(uv),gradY=dFdy(uv);
+ if(sphere==1){gradX.x-=round(gradX.x/tiling)*tiling;gradY.x-=round(gradY.x/tiling)*tiling;}
  if(hasHeight==1){
   vec3 vt=vec3(dot(v,tangent),dot(v,bitangent),abs(dot(v,n)));
-  vec2 gradX=dFdx(uv),gradY=dFdy(uv);
   vec2 ray=vt.xy/max(vt.z,.25)*heightStrength*smoothstep(.08,.45,vt.z);
   vec2 currentUv=uv+ray*.5,previousUv=currentUv;
   float layer=0.,gap=1.-textureGrad(heightMap,currentUv,gradX,gradY).r;
@@ -174,25 +175,25 @@ void main(){
  }
  vec3 base=vec3(.55,.31,.16);float rough=roughness,metal=metallic,ao=1.;
  if(demo==1){vec3 z=p*7.;float patina=smoothstep(.39,.58,fbm(z));float grain=noise(p*220.);base=mix(vec3(.42,.19,.065),vec3(.025,.22,.16),patina);base*=.6+fbm(z*6.)*.8;rough=clamp(roughness+patina*.3+(grain-.5)*.13,.04,1.);metal=metallic*(1.-patina*.85);n=normalize(n+tangent*(noise(p*140.)-.5)*.18*normalStrength+bitangent*(noise(p*140.+10.)-.5)*.18*normalStrength);}
- if(hasBase==1)base=pow(texture(baseMap,uv).rgb,vec3(2.2));
- if(hasPacked==1){vec3 pack=texture(packedMap,uv).rgb;if(packing==0){ao=pack.r;rough=pack.g;metal=pack.b;}else if(packing==1){rough=pack.r;metal=pack.g;ao=pack.b;}else{metal=pack.r;rough=pack.g;ao=pack.b;}}
- if(hasGlossiness==1)rough=1.-texture(glossinessMap,uv).r;
- if(hasRoughness==1)rough=texture(roughnessMap,uv).r;
- if(hasMetallic==1)metal=texture(metallicMap,uv).r;
- if(hasAo==1)ao=texture(aoMap,uv).r;
+ if(hasBase==1)base=pow(textureGrad(baseMap,uv,gradX,gradY).rgb,vec3(2.2));
+ if(hasPacked==1){vec3 pack=textureGrad(packedMap,uv,gradX,gradY).rgb;if(packing==0){ao=pack.r;rough=pack.g;metal=pack.b;}else if(packing==1){rough=pack.r;metal=pack.g;ao=pack.b;}else{metal=pack.r;rough=pack.g;ao=pack.b;}}
+ if(hasGlossiness==1)rough=1.-textureGrad(glossinessMap,uv,gradX,gradY).r;
+ if(hasRoughness==1)rough=textureGrad(roughnessMap,uv,gradX,gradY).r;
+ if(hasMetallic==1)metal=textureGrad(metallicMap,uv,gradX,gradY).r;
+ if(hasAo==1)ao=textureGrad(aoMap,uv,gradX,gradY).r;
  rough=clamp(rough,.045,1.);metal=clamp(metal,0.,1.);
- if(hasNormal==1){vec3 nn=texture(normalMap,uv).xyz*2.-1.;nn.xy*=normalStrength;if(flipGreen==1)nn.y=-nn.y;n=normalize(tangent*nn.x+bitangent*nn.y+n*max(nn.z,.01));}
+ if(hasNormal==1){vec3 nn=textureGrad(normalMap,uv,gradX,gradY).xyz*2.-1.;nn.xy*=normalStrength;if(flipGreen==1)nn.y=-nn.y;n=normalize(tangent*nn.x+bitangent*nn.y+n*max(nn.z,.01));}
  n=normalize(rot*n);v=normalize(rot*v);
- vec3 f0=mix(vec3(.04),base,metal);if(hasSpecular==1)f0=pow(texture(specularMap,uv).rgb,vec3(2.2));
+ vec3 f0=mix(vec3(.04),base,metal);if(hasSpecular==1)f0=pow(textureGrad(specularMap,uv,gradX,gradY).rgb,vec3(2.2));
  vec3 key=vec3(4.,3.6,3.2),rim=vec3(1.5,1.9,2.7);
  if(environment==1){key=vec3(4.,.6,5.);rim=vec3(.15,4.,5.);}
  if(environment==2){key=vec3(5.,2.4,.8);rim=vec3(1.,.8,2.);}
  vec3 color=light(n,v,normalize(vec3(-.7,1.,1.5)),key,base,f0,metal,rough)+light(n,v,normalize(vec3(1.,.4,.4)),rim,base,f0,metal,rough);
  float nv=max(dot(n,v),0.);vec3 F=f0+(max(vec3(1.-rough),f0)-f0)*pow(1.-nv,5.);
  color+=(base*(1.-metal)*sky(n,1.)*.6+sky(reflect(-v,n),rough)*F)*ao;
- if(hasEmissive==1)color+=pow(texture(emissiveMap,uv).rgb,vec3(2.2))*2.;
+ if(hasEmissive==1)color+=pow(textureGrad(emissiveMap,uv,gradX,gradY).rgb,vec3(2.2))*2.;
  color*=exposure;color=(color*(2.51*color+.03))/(color*(2.43*color+.59)+.14);color=pow(clamp(color,0.,1.),vec3(1./2.2));
- float alpha=hasOpacity==1?texture(opacityMap,uv).r:hasBase==1?texture(baseMap,uv).a:1.;
+ float alpha=hasOpacity==1?textureGrad(opacityMap,uv,gradX,gradY).r:hasBase==1?textureGrad(baseMap,uv,gradX,gradY).a:1.;
  frag=vec4(mix(pow(bg,vec3(1./2.2)),color,alpha),1.);
 }`;
 
