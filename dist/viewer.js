@@ -249,7 +249,33 @@ let dragDepth=0;
 document.addEventListener('dragenter',event => { if (event.dataTransfer.types.includes('Files')) { event.preventDefault(); dragDepth++; $('drop-overlay').hidden=false; } });
 document.addEventListener('dragover',event => { if (event.dataTransfer.types.includes('Files')) { event.preventDefault(); event.dataTransfer.dropEffect='copy'; } });
 document.addEventListener('dragleave',event => { if (event.dataTransfer.types.includes('Files')) { dragDepth=Math.max(0,dragDepth-1); if (!dragDepth) $('drop-overlay').hidden=true; } });
-document.addEventListener('drop',event => { event.preventDefault(); dragDepth=0; $('drop-overlay').hidden=true; if (event.dataTransfer.files.length) enqueue(event.dataTransfer.files); });
+document.addEventListener('drop',event => {
+  event.preventDefault(); dragDepth=0; $('drop-overlay').hidden=true;
+  const roots = [...event.dataTransfer.items].filter(item => item.kind === 'file').map(item => item.webkitGetAsEntry?.() || item.getAsFile()).filter(Boolean);
+  if (!roots.length) { if (event.dataTransfer.files.length) enqueue(event.dataTransfer.files); return; }
+  const version = workspaceVersion;
+  loadQueue = loadQueue.then(async () => {
+    const files = [], pending = [...roots];
+    for (let index = 0; index < pending.length; index++) {
+      if (version !== workspaceVersion) return;
+      const entry = pending[index];
+      if (entry.isDirectory) {
+        const reader = entry.createReader();
+        while (true) {
+          const entries = await new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+          if (!entries.length) break;
+          pending.push(...entries);
+        }
+      } else {
+        const file = entry.isFile ? await new Promise((resolve, reject) => entry.file(resolve, reject)) : entry;
+        if (!entry.isFile || file.type.startsWith('image/') || /\.(png|jpe?g|webp|avif|gif|bmp|svg|ico)$/i.test(file.name)) files.push(file);
+      }
+    }
+    if (version !== workspaceVersion) return;
+    if (files.length) await importFiles(files);
+    else { notices = ['No supported image files found in the dropped folder.']; renderMaps(); }
+  }).catch(error => { if (version === workspaceVersion) { notices = [`Could not read dropped files: ${error.message}`]; renderMaps(); } });
+});
 window.addEventListener('blur',()=>{dragDepth=0;$('drop-overlay').hidden=true;});
 for (const key of ['tiling','roughness','metallic','normal','height','exposure']) {
   $(key).oninput=()=>{state[key]=Number($(key).value);$(`${key}-out`).textContent=key==='tiling'?`${state[key].toFixed(1)}×`:state[key].toFixed(key==='height'?3:2);};
