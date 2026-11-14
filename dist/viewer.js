@@ -76,6 +76,21 @@ function assign(item, key, packing = 0) {
 async function importFiles(files) {
   const version = workspaceVersion; notices = [];
   if (!gl) return;
+  if (files.length > 1) {
+    for (const item of [...maps.values(), ...unassigned]) {
+      gl.deleteTexture(item.texture);
+      URL.revokeObjectURL(item.url);
+    }
+    slots.forEach((_, index) => {
+      gl.activeTexture(gl.TEXTURE0 + index);
+      gl.bindTexture(gl.TEXTURE_2D, fallback);
+    });
+    gl.activeTexture(gl.TEXTURE0);
+    maps.clear(); unassigned = [];
+    state.demo = false;
+    $('material-name').textContent = 'Loading texture set…';
+    renderMaps();
+  }
   for (const file of files) {
     const url = URL.createObjectURL(file);
     try {
