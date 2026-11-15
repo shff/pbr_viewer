@@ -136,7 +136,7 @@ function renderMaps() {
     .join(" ");
 }
 
-function detect(name) {
+function detect(name, metallicOccurrences = 1) {
   const stem = name.toLowerCase().replace(/\.[^.]+$/, "");
   const s = stem.replace(/[^a-z0-9]+/g, " ");
   if (
@@ -152,7 +152,6 @@ function detect(name) {
     ["normal", /normal|(?:^| )(nor|nrm|n|normalgl|normaldx)(?: |$)/],
     ["ao", /ambient.?occlusion|occlusion|(?:^| )ao(?: |$)/],
     ["roughness", /roughness|rough|(?:^| )rgh(?: |$)/],
-    ["metallic", /metallic|metalness|(?:^| )(metal|mtl)(?: |$)/],
     ["height", /height|displacement|displace|(?:^| )(disp|bump)(?: |$)/],
     ["emissive", /emissive|emission|(?:^| )emit(?: |$)/],
     ["opacity", /opacity|alpha|transparency/],
@@ -162,8 +161,13 @@ function detect(name) {
       "base",
       /base.?colou?r|albedo|diffuse|colou?r|(?:^| )(diff|col|bc)(?: |$)/,
     ],
+    ["metallic", /metallic|metalness|(?:^| )(metal|mtl)(?: |$)/],
   ];
-  for (const [key, regex] of rules) if (regex.test(s)) return [key, 0];
+  for (const [key, regex] of rules) {
+    if (key === "metallic" &&
+        (s.match(/metallic|metalness|metal|(?:^| )mtl(?= |$)/g) || []).length < metallicOccurrences) continue;
+    if (regex.test(s)) return [key, 0];
+  }
   return null;
 }
 
@@ -199,6 +203,13 @@ async function importFiles(files) {
     $("material-name").textContent = "Loading texture set…";
     renderMaps();
   }
+  const metallicCounts = files.map((file) =>
+    (file.name.toLowerCase().replace(/\.[^.]+$/, "").replace(/[^a-z0-9]+/g, " ")
+      .match(/metallic|metalness|metal|(?:^| )mtl(?= |$)/g) || []).length,
+  );
+  const metallicOccurrences = files.length > 1 && metallicCounts.every((count) => count > 0)
+    ? metallicCounts.reduce((minimum, count) => Math.min(minimum, count), Infinity) + 1
+    : 1;
   for (const file of files) {
     const url = URL.createObjectURL(file);
     try {
@@ -240,7 +251,7 @@ async function importFiles(files) {
           Math.min(8, gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT)),
         );
       const item = { texture, name: file.name, url };
-      const match = detect(file.name);
+      const match = detect(file.name, metallicOccurrences);
       if (match) assign(item, ...match);
       else unassigned.push(item);
       state.demo = false;
