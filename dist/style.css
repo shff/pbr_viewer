@@ -146,6 +146,14 @@ p {
     transform: rotate(225deg);
 }
 
+.faq img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+    border-radius: 8px;
+}
+
 .faq summary:hover,
 .faq details[open] summary {
     color: var(--violet);
