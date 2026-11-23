@@ -75,9 +75,15 @@ function renderMaps() {
     info.append(name, file);
     row.append(thumb, info);
     if (item) {
-      const status = document.createElement("span");
+      const status = document.createElement("button");
       status.className = "status";
-      status.textContent = "✓";
+      status.title = `Toggle ${title} map`;
+      status.setAttribute("aria-label", status.title);
+      status.setAttribute("aria-pressed", String(item.enabled));
+      status.onclick = () => {
+        item.enabled = !item.enabled;
+        status.setAttribute("aria-pressed", String(item.enabled));
+      };
       row.append(status);
       const remove = document.createElement("button");
       remove.textContent = "×";
@@ -179,6 +185,7 @@ function assign(item, key, packing = 0) {
       `${previous.name} moved to unassigned; ${item.name} uses ${key}.`,
     );
   }
+  item.enabled = true;
   maps.set(key, item);
   if (key === "packed") state.packed = packing;
 }
@@ -456,7 +463,7 @@ if (gl) {
         gl.uniform1i(uniforms[`${key}Map`], i);
         gl.uniform1i(
           uniforms[`has${key[0].toUpperCase() + key.slice(1)}`],
-          +maps.has(key),
+          maps.get(key)?.enabled ? 1 : 0,
         );
       });
       gl.drawArrays(gl.TRIANGLES, 0, 3);

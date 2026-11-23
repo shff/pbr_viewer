@@ -296,9 +296,8 @@ canvas {
 
 .maps {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 6px;
-    max-height: 248px;
-    overflow: auto;
     padding-right: 2px;
 }
 
@@ -363,6 +362,15 @@ canvas {
 .map .status {
     color: var(--lime);
     font-size: 10px;
+}
+
+.map .status::before {
+    content: "✓";
+}
+
+.map .status[aria-pressed="false"]::before {
+    content: "−";
+    color: var(--muted);
 }
 
 #file-message {
@@ -617,10 +625,6 @@ button:hover {
 
     .panel {
         padding: 15px;
-    }
-
-    .maps {
-        max-height: 230px;
     }
 
     .environments {
