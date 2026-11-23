@@ -62,7 +62,25 @@ button.quiet {
 main {
     max-width: 1560px;
     margin: auto;
-    padding: 43px 4.5% 0;
+    padding: 43px 4.5%;
+}
+
+.viewer-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px 32px;
+    margin-bottom: 20px;
+}
+
+.viewer-header h1 {
+    margin: 0;
+    font: 500 clamp(26px, 3vw, 42px) "Space Grotesk", sans-serif;
+    letter-spacing: -1.7px;
+}
+
+.viewer-header h1 span {
+    color: var(--violet);
 }
 
 .eyebrow {
@@ -75,6 +93,70 @@ main {
 p {
     color: var(--muted);
     margin: 10px 0;
+}
+
+.faq {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: clamp(20px, 4vw, 64px);
+    margin-top: 28px;
+    padding: clamp(20px, 3vw, 44px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: linear-gradient(125deg, #242033, var(--panel) 45%);
+}
+
+.faq h2 {
+    margin: 0;
+    font: 500 clamp(26px, 3vw, 42px)/1.1 "Space Grotesk", sans-serif;
+    letter-spacing: -0.04em;
+}
+
+.faq details {
+    border-bottom: 1px solid var(--border);
+}
+
+.faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 2px;
+    list-style: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.faq summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq summary::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    flex: none;
+    margin-right: 4px;
+    border: solid var(--violet);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.faq details[open] summary::after {
+    transform: rotate(225deg);
+}
+
+.faq summary:hover,
+.faq details[open] summary {
+    color: var(--violet);
+}
+
+.faq p,
+.faq ul {
+    max-width: 70ch;
+    margin: 0 0 16px;
+    color: #c3c4d0;
+    line-height: 1.6;
 }
 
 .workspace {
@@ -429,11 +511,12 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .lighting {
-    margin-top: 20px;
+    flex: 1 1 850px;
     border: 1px solid var(--border);
     border-radius: 12px;
     background: #191b24;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 28px;
     padding: 23px;
@@ -601,8 +684,17 @@ button:hover {
 }
 
 @media (max-width: 760px) {
+    .faq {
+        grid-template-columns: 1fr;
+    }
+
+    .viewer-header h1 {
+        font-size: 29px;
+        letter-spacing: -1px;
+    }
+
     main {
-        padding: 28px 5% 0;
+        padding: 28px 5%;
     }
 
     .workspace {

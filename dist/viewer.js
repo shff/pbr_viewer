@@ -649,7 +649,7 @@ $("capture").onclick = () => {
   canvas.toBlob((blob) => {
     if (!blob) return;
     const a = document.createElement("a");
-    a.download = "chroma-material.png";
+    a.download = "pbr-material.png";
     a.href = URL.createObjectURL(blob);
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);

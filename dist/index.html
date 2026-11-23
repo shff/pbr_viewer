@@ -4,11 +4,58 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="theme-color" content="#11121a" />
-        <title>CHROMA — PBR Texture Lab</title>
+        <title>PBR viewer – Preview PBR texture maps online</title>
+        <meta
+            name="description"
+            content="Preview PBR textures on a sphere or plane in your browser. Drop in a texture set, toggle individual maps, and compare the material under different lighting."
+        />
+        <meta property="og:title" content="PBR viewer – Preview PBR texture maps online" />
+        <meta property="og:type" content="website" />
+        <meta
+            property="og:description"
+            content="Preview PBR textures on a sphere or plane in your browser. Drop in a texture set, toggle individual maps, and compare the material under different lighting."
+        />
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
         <main>
+            <header class="viewer-header">
+                <h1>PBR <span>viewer</span></h1>
+                <section class="lighting">
+                    <div>
+                        <span class="eyebrow">SET THE MOOD</span>
+                        <h2>Light changes everything.</h2>
+                    </div>
+                    <div class="environments">
+                        <button class="environment active" data-env="0">
+                            <span class="env-swatch studio"></span>
+                            <span>Studio<small>Clean & neutral</small></span>
+                            <i></i>
+                        </button>
+                        <button class="environment" data-env="1">
+                            <span class="env-swatch neon"></span>
+                            <span>Neon arcade<small>Violet & cyan</small></span>
+                            <i></i>
+                        </button>
+                        <button class="environment" data-env="2">
+                            <span class="env-swatch sunset"></span>
+                            <span>Golden hour<small>Warm & cinematic</small></span>
+                            <i></i>
+                        </button>
+                    </div>
+                    <label class="exposure">
+                        Exposure <output id="exposure-out">1.00</output>
+                        <input
+                            id="exposure"
+                            type="range"
+                            min=".2"
+                            max="3"
+                            step=".01"
+                            value="1"
+                    /></label>
+                    <button id="reset" class="quiet">↺ Reset workspace</button>
+                </section>
+            </header>
             <div class="workspace">
                 <section class="viewport" aria-label="Material preview">
                     <div class="view-head">
@@ -64,6 +111,7 @@
                             <h2>Texture set</h2>
                             <span id="map-count">0 MAPS</span>
                         </div>
+                        <p>Preview your PBR textures on a sphere or plane. Toggle individual maps to see how each affects the material under different lighting.</p>
                         <button id="drop-zone" class="drop-zone">
                             <span class="upload-icon">↥</span>
                             <strong>Drop your textures here</strong>
@@ -153,39 +201,39 @@
                     </section>
                 </aside>
             </div>
-            <section class="lighting">
+            <section class="faq" aria-labelledby="faq-heading">
+                <h2 id="faq-heading">Frequently asked questions</h2>
                 <div>
-                    <span class="eyebrow">SET THE MOOD</span>
-                    <h2>Light changes everything.</h2>
+                    <details>
+                        <summary>How do I preview a PBR material?</summary>
+                        <p>Drop the texture files for one material into the viewer together. Choose a sphere to see how highlights follow a curved surface, or a plane to inspect the texture as it tiles. Switch lighting presets to compare the same material under different lights.</p>
+                    </details>
+                    <details>
+                        <summary>Which texture maps can I use?</summary>
+                        <p>Load base color, normal, roughness, metallic, ambient occlusion, height, emissive, opacity, glossiness, and specular maps. The viewer matches filenames such as <code>stone_roughness.png</code> automatically. If a file is unmatched, use the menu beside its name to assign it.</p>
+                    </details>
+                    <details>
+                        <summary>How do I load a packed ORM, ARM, RMA, or MRA map?</summary>
+                        <p>Include the layout in the filename, for example <code>stone_orm.png</code>. Each layout assigns a material property to the red, green, and blue channels in this order:</p>
+                        <ul>
+                            <li><strong>ORM / ARM</strong> — ambient occlusion, roughness, metallic</li>
+                            <li><strong>RMA</strong> — roughness, metallic, ambient occlusion</li>
+                            <li><strong>MRA</strong> — metallic, roughness, ambient occlusion</li>
+                        </ul>
+                    </details>
+                    <details>
+                        <summary>Why do bumps look like dents?</summary>
+                        <p>Check the normal map convention. Enable <strong>DirectX normal map (flip green)</strong> for a DirectX map. Leave it off for an OpenGL map.</p>
+                    </details>
+                    <details>
+                        <summary>How can I see what a single map contributes?</summary>
+                        <p>Click the green check beside a loaded map to turn it off. Click the minus to turn it back on. The texture stays loaded, so you can compare both views under the same lighting.</p>
+                    </details>
+                    <details>
+                        <summary>Do my textures leave my device?</summary>
+                        <p>Your browser reads the texture files locally and renders the material with WebGL. To save a PNG of the current view, use the <strong>Save preview image</strong> button in the preview.</p>
+                    </details>
                 </div>
-                <div class="environments">
-                    <button class="environment active" data-env="0">
-                        <span class="env-swatch studio"></span>
-                        <span>Studio<small>Clean & neutral</small></span>
-                        <i></i>
-                    </button>
-                    <button class="environment" data-env="1">
-                        <span class="env-swatch neon"></span>
-                        <span>Neon arcade<small>Violet & cyan</small></span>
-                        <i></i>
-                    </button>
-                    <button class="environment" data-env="2">
-                        <span class="env-swatch sunset"></span>
-                        <span>Golden hour<small>Warm & cinematic</small></span>
-                        <i></i>
-                    </button>
-                </div>
-                <label class="exposure">
-                    Exposure <output id="exposure-out">1.00</output>
-                    <input
-                        id="exposure"
-                        type="range"
-                        min=".2"
-                        max="3"
-                        step=".01"
-                        value="1"
-                /></label>
-                <button id="reset" class="quiet">↺ Reset workspace</button>
             </section>
         </main>
         <div id="drop-overlay" hidden>
